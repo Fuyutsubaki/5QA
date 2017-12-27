@@ -1,0 +1,6 @@
+AS_DEBUG/
+engine/
+example/
+Intermediate/
+dll_*/
+Debug-x86/

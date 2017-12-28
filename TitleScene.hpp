@@ -5,6 +5,7 @@ class TitleScene
 	:public scene::RootScene::Scene
 {
 	s3d::Rect start_button{ 80, 40 };
+	Texture texture = Texture{ L"dat/BASY.png" };
 public:
 	TitleScene(const InitData& init)
 		: IScene(init)
@@ -18,7 +19,7 @@ public:
 	}
 
 	void draw()const override {
-		asset::Font::me15()(L"BASY").draw();
+		texture.draw();
 		start_button.drawFrame();
 		asset::Font::me15()(L"‚Í‚¶‚ß‚é").drawAt(start_button.center());
 	}

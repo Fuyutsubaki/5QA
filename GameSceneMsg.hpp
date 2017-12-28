@@ -47,6 +47,12 @@ namespace gamescene{
 		s3d::Array<gamedat::Card> drawable_card_list;
 	};
 
+	struct StartGame 
+		:util::Record<1, StartGame>
+	{
+		int discardable_color_num;
+	};
+
 	struct EndGame 
 		:util::Record<3, EndGame>
 	{
@@ -61,15 +67,16 @@ namespace gamescene{
 			s3d::String name;
 		};
 		struct AllDiscard {
-			gamedat::Card::Color color;
+			s3d::Array<gamedat::Card::Color> color_list;
 		};
-
+		using Kimarite = std::variant<Basy, Handless, AllDiscard>;
 		s3d::Array<Player> player_info_list;
-		std::variant<Basy, Handless, AllDiscard> kimarite;
+		Kimarite kimarite;
+
 		bool gameover;
 	};
 
-	using GameModelMsg = std::variant<AddHand, RemoveHand, AddDiscard, UpdateDrawnPlayerList, UpdateTurnPlayer, EndGame>;
+	using GameModelMsg = std::variant<AddHand, RemoveHand, AddDiscard, UpdateDrawnPlayerList, UpdateTurnPlayer, StartGame, EndGame>;
 
 	struct DrawCard 
 		:util::Record<2, DrawCard>

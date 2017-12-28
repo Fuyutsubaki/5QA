@@ -69,18 +69,18 @@ namespace gameview_detail {
 	class PlayerHand
 		:public ObjectBase
 	{
+		bool enable_draw = true;
 	public:
 		// todo カプセル化
 		s3d::Array<Card> hands;
 
 		using ObjectBase::ObjectBase;
-		void draw_impl() const override {
-			s3d::Rect{ rect.size }.drawFrame();
-			for (auto&e : hands) {
-				e.draw();
-			}
-		}
+		void draw_impl() const override;
 		void update();
+		void set_enable_draw(bool r) {
+			enable_draw = r;
+		}
+	private:
 		s3d::Array<gamescene::CtrlMsg> input_impl()const {
 			for (auto it = hands.rbegin(); it != hands.rend(); ++it) {
 				auto msg_list = it->check_input();
@@ -102,32 +102,17 @@ namespace gameview_detail {
 			int max;
 		};
 		s3d::Array<Dat> list;
-		
+		int discarable_color_num = 0;;
 	public:
 		using ObjectBase::ObjectBase;
 		// 全体のカードについての情報が必要
 		void draw_impl() const override;
 		void setCardList(s3d::Array<gamedat::Card> const&card_list);
-
 		void addCard(gamedat::Card const&card);
-	};
-
-	//game info view
-	class GameInfoView 
-		:public ObjectBase
-	{
-
-	public:
-		using ObjectBase::ObjectBase;
-
-		void draw_impl() {
-
+		void set_discardable_color_num(int n) {
+			discarable_color_num = n;
 		}
-
-	private:
-		s3d::Array<int> guiter;
 	};
-
 
 	class ResultWindow
 		:public ObjectBase
@@ -139,11 +124,11 @@ namespace gameview_detail {
 			int sum_point;
 		};
 		s3d::Array<PlayerInfo> pointlist;
-		s3d::String kimarite;
-		bool gameover;
+		s3d::String text;
 		s3d::Rect ok_button;
 		void draw_impl()const override;
 		s3d::Array<gamescene::CtrlMsg> input_impl()const override;
+
 	public:
 		ResultWindow(s3d::String const&id, s3d::Rect const&rect, s3d::Rect const& ok)
 			:ObjectBase(id, rect), ok_button{ ok }
@@ -151,7 +136,9 @@ namespace gameview_detail {
 		void add_player(PlayerInfo const&player) {
 			pointlist.push_back(player);
 		}
-		void init();
+		void add_text(s3d::String const&text_) {
+			text = text_;
+		}
 	};
 }
 
@@ -223,20 +210,16 @@ private:
 		discard->addCard(dat->get_card(msg.card_id));
 	}
 
-	void apply_msg_impl(gamescene::EndGame const&msg) {
-		for (auto p : msg.player_info_list) {
-			result_window->add_player({ p.name,p.point_list,p.point_list.sum() });
-		}
-		
-		pop_gameresult = true;
-	}
+	void apply_msg_impl(gamescene::StartGame const&msg);
+	void apply_msg_impl(gamescene::EndGame const&msg);
 
 	template<class T>
 	void apply_msg_impl(T) {	}
 
 	void apply_msg_impl(gamescene::UpdateDrawnPlayerList const&msg) {
-		//discard->addCard(dat->get_card(msg.card_id));
-		// todo
+		for (auto &p : hand_list) {
+			p.set_enable_draw(! msg.playerd_player_id_list.include(p.id()));
+		}
 	}
 };
 

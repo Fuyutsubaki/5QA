@@ -9,7 +9,7 @@ void GameModel::player_turn_state(std::shared_ptr<PlayerModel>& from, std::share
 	}
 
 	if (from == turn_player || to != turn_player || played_player_list.include(from)) { // 違法な命令
-		LOG_INFO(L"違法な状態です");
+		//LOG_INFO(L"違法な状態です");
 		return;
 	}
 
@@ -22,10 +22,8 @@ void GameModel::player_turn_state(std::shared_ptr<PlayerModel>& from, std::share
 
 	{
 		played_player_list.push_back(from);
-		s3d::Print(from->id);
 		if (played_player_list.size() == player_list.size()) {
 			played_player_list = {};
-			s3d::ClearPrint();
 		}
 		
 		msg_list.push_back(gamescene::UpdateDrawnPlayerList::ctor(played_player_list.map([](auto const&p) {return p->id; })));
@@ -44,9 +42,15 @@ void GameModel::player_turn_state(std::shared_ptr<PlayerModel>& from, std::share
 
 void GameModel::checkend() {
 	//誰かの手札が0になった
-	auto handless = [&] {return player_list.any([](auto const&p) {return p->hands.size() == 0; }); };
+	auto handless = [&] ()->std::optional<s3d::String>{
+		auto p = util::find_if(player_list, [](auto const&p) {return p->hands.size() == 0; });
+		if (p)
+			return (*p)->id;
+		else
+			return std::nullopt;
+	}();
 	// 同じ色の数字カードが出きった
-	auto discard_all_one_color = [&] {
+	auto discard_color = [&]()->std::optional<s3d::Array<gamedat::Card::Color>> {
 		auto numlist = dat->get_card_list().filter([](gamedat::Card const&c) {
 			auto p = std::get_if<gamedat::Card::Number>(&c.type);
 			return !!p;
@@ -58,57 +62,66 @@ void GameModel::checkend() {
 			return !!p;
 		});
 		auto discard_ = util::group_by(discard_num_list, [](gamedat::Card const&c) {return c.color; });
-		return util::make_vector(discard_).any([&](auto const&pair) {return pair.second.size() == allcard_[pair.first].size(); });
-	};
+		auto list = util::make_vector(discard_).filter([&](auto const&pair) {return pair.second.size() == allcard_[pair.first].size(); }).map([](auto const&pair) {return pair.first; });
+		if (list.size() >= discardable_color_num())
+			return list;
+		else
+			return std::nullopt;
+	}();
 
 	// alphaカードがそろった
-	auto complate_alpha_card = [&] {
-		return player_list.any([&](auto const&p) {
+	auto complate_alpha_card = [&]()->std::optional<s3d::String> {
+		auto p = util::find_if(player_list, [&](auto const&p) {
 			return dat->get_alphaword_list().all([&](auto const&alpha) {
 				return p->hands.include_if([&](gamedat::Card const&c) {return c.type == decltype(c.type)(alpha); });
 
 			});
-		}); };
+		});
+		if (p) {
+			return (*p)->id;
+		}
+		else {
+			return std::nullopt;
+		}
+
+	}();
 
 
-	if (handless() || discard_all_one_color() || complate_alpha_card()) {
+	if (handless || discard_color || complate_alpha_card) {
 		for (auto p :player_list) {
 			p->point_list.push_back(count_point(p->hands));
 		}
 
-		// gameover-check
-		//TODO
-		auto a = handless();
-		auto b = discard_all_one_color();
-		auto c = complate_alpha_card();
-		if (player_list.any([](auto const&p) {return p->point_list.sum() >= 500; })) {
-			msg_list.push_back(gamescene::EndGame::ctor(
-				player_list.map([](auto p) {return gamescene::EndGame::Player{ p->id, p->point_list }; }),
-				gamescene::EndGame::AllDiscard{ gamedat::Card::Color::red },
-				true
-			));
-			state_gameover = true;
-			state_gameend = true;
+		auto kimarite = [&]()-> gamescene::EndGame::Kimarite {
+			if (complate_alpha_card) {
+				return gamescene::EndGame::Basy{ *complate_alpha_card };
+			}
+			else if (discard_color) {
+				return gamescene::EndGame::AllDiscard{ *discard_color };
+			}
+			else if (handless) {
+				return gamescene::EndGame::Handless{ *handless };
+			}
+		}();
+
+		if (complate_alpha_card) {
+			basy_count += 1;
 		}
-		else {
-			msg_list.push_back(gamescene::EndGame::ctor(
-				player_list.map([](auto p) {return gamescene::EndGame::Player{ p->id, p->point_list }; }),
-				gamescene::EndGame::AllDiscard{ gamedat::Card::Color::red },
-				false
-			));
-			state_gameend = true;
+		auto player = player_list.map([](auto p) {return gamescene::EndGame::Player{ p->id, p->point_list }; });
+		bool gameover = player_list.any([](auto const&p) {return p->point_list.sum() >= 500; }) || basy_count >= 3;
+		msg_list.push_back(gamescene::EndGame::ctor(player, kimarite, gameover));
+		state_gameend = true;
+		if (gameover) {
+			state_gameover = true;
 		}
 	}
 }
 
-void GameModel::deal_hands(s3d::Array<gamedat::Card>const &deck, s3d::Array<gamedat::Card>const &discard_init){
-	 discard_list = discard_init;
-	 msg_list.append(
-		 discard_list.map([&](auto card) ->gamescene::GameModelMsg {return gamescene::AddDiscard::ctor(card.id); })
-	 );
+void GameModel::deal_hands(){
+	discard_list = {};
+	msg_list.push_back(gamescene::StartGame::ctor(discardable_color_num()));
 
-
-	auto list = deck;
+	auto list = dat->get_card_list();
 	list.shuffle();
 	int idx = 0;
 	for (auto hand_card : list.in_groups(player_list.size())) {
@@ -140,35 +153,6 @@ void GameModel::deal_hands(s3d::Array<gamedat::Card>const &deck, s3d::Array<game
 	 state_gameend = false;
 	 played_player_list = {};
 
-
-	 // handsからそろっているBASYを廃棄
-	 s3d::Array<gamedat::Card> to_discard;
-	 for (auto p : player_list) {
-		 bool has_all = dat->get_alphaword_list().all([&](auto const&a) {return p->hands.include_if([&](auto const&c) {return c.type == decltype(c.type)(a); }); });
-		 if (has_all) {
-
-			 // todo 抽象化
-			 for (auto a : dat->get_alphaword_list()) {
-				 for (int i = 0; i < p->hands.size(); ++i) {
-					 if (p->hands[i].type == decltype(p->hands[i].type)(a)) {
-						 to_discard.push_back(p->hands[i]);
-						 p->hands.remove_at(i);
-						 break;
-					 }
-				 }
-			 }
-		 }
-	 }
-	 // discardの数字カードと手札を回収
-	 s3d::Array<gamedat::Card> newdeck;
-	 newdeck.append(util::flatmap(player_list, [](auto p) {return p->hands; }));
-	 newdeck.append(discard_list.filter([](auto const&c) {return !!std::get_if<gamedat::Card::Number>(&c.type); }));
-	 discard_list.remove_if([](auto const&c) {return std::get_if<gamedat::Card::Number>(&c.type); });
-	 discard_list.append(to_discard);
-	 for (auto p : player_list) {
-		 p->hands = {};
-	 }
-
 	 // 再配布
-	 deal_hands(newdeck, discard_list);
+	 deal_hands();
  }

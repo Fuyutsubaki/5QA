@@ -203,6 +203,7 @@
     <Text Include="example\LICENSE.txt" />
     <Text Include="example\script.txt" />
     <Text Include="example\test.txt" />
+    <Text Include="readme.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />

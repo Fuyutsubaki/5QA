@@ -135,6 +135,7 @@
     <Text Include="example\script.txt">
       <Filter>Resource Files\example</Filter>
     </Text>
+    <Text Include="readme.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="example\test.ini">

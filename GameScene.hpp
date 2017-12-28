@@ -51,7 +51,7 @@ namespace scene {
 			model.setup_update();
 		}
 		bool need_newgame()const { return flag_need_newgame; }
-		bool gameover()const { return flag_gameover && model.gameover(); }
+		bool gameover()const { return flag_gameover; }
 		void start_newgame() {
 			model.start_nextgame();
 			flag_need_newgame = false;

@@ -7,7 +7,7 @@ namespace gamedat{
 	
 	struct Card {
 		s3d::String id;
-		enum class Color { red, yellow, green, orange };
+		enum class Color { red, blue, green, orange };
 		Color color;
 		struct Number :util::Record<1, Number>{ int num; };
 		struct Alpha :util::Record<1, Alpha> { s3d::String word; };
@@ -40,7 +40,7 @@ namespace gamedat{
 		}
 
 		s3d::Array<Card::Alpha> get_alphaword_list()const {
-			return s3d::Array<s3d::String>({ L">",L"B",L"A" ,L"S" ,L"Y" ,L"!" }).map([](auto const&s) {return Card::Alpha::ctor(s); });
+			return s3d::Array<s3d::String>({ L"B",L"A" ,L"S" ,L"Y" }).map([](auto const&s) {return Card::Alpha::ctor(s); });
 		}
 
 		static std::shared_ptr<GameData> make();

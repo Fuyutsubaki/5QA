@@ -27,9 +27,9 @@ namespace gamedat {
 		green  3  4
 		green  5  4
 		green  107  4
-		yellow  25 4
-		yellow  50 4
-		yellow  75 4
+		blue  25 4
+		blue  50 4
+		blue  75 4
 		orange 0 2
 		orange 4 2
 		orange 8 2
@@ -38,10 +38,10 @@ namespace gamedat {
 		EOS
 
 		perl -nale '@s = map {$id="ca_${F[0]}_$_";qq/Card{ L"${id}", Card::Color::${F[0]},Card::Alpha::ctor(L"$_") },/ } @F[1..$#F];print for(@s)' <<EOS
-		red  A S Y
-		green B  S Y
-		yellow B A  Y
-		orange B A S
+		red  B S
+		blue B A
+		green  S Y
+		orange A Y
 		EOS
 
 
@@ -71,18 +71,18 @@ namespace gamedat {
 			Card{ L"cn107_2", Card::Color::green,Card::Number::ctor(107) },
 			Card{ L"cn107_3", Card::Color::green,Card::Number::ctor(107) },
 			Card{ L"cn107_4", Card::Color::green,Card::Number::ctor(107) },
-			Card{ L"cn25_1", Card::Color::yellow,Card::Number::ctor(25) },
-			Card{ L"cn25_2", Card::Color::yellow,Card::Number::ctor(25) },
-			Card{ L"cn25_3", Card::Color::yellow,Card::Number::ctor(25) },
-			Card{ L"cn25_4", Card::Color::yellow,Card::Number::ctor(25) },
-			Card{ L"cn50_1", Card::Color::yellow,Card::Number::ctor(50) },
-			Card{ L"cn50_2", Card::Color::yellow,Card::Number::ctor(50) },
-			Card{ L"cn50_3", Card::Color::yellow,Card::Number::ctor(50) },
-			Card{ L"cn50_4", Card::Color::yellow,Card::Number::ctor(50) },
-			Card{ L"cn75_1", Card::Color::yellow,Card::Number::ctor(75) },
-			Card{ L"cn75_2", Card::Color::yellow,Card::Number::ctor(75) },
-			Card{ L"cn75_3", Card::Color::yellow,Card::Number::ctor(75) },
-			Card{ L"cn75_4", Card::Color::yellow,Card::Number::ctor(75) },
+			Card{ L"cn25_1", Card::Color::blue,Card::Number::ctor(25) },
+			Card{ L"cn25_2", Card::Color::blue,Card::Number::ctor(25) },
+			Card{ L"cn25_3", Card::Color::blue,Card::Number::ctor(25) },
+			Card{ L"cn25_4", Card::Color::blue,Card::Number::ctor(25) },
+			Card{ L"cn50_1", Card::Color::blue,Card::Number::ctor(50) },
+			Card{ L"cn50_2", Card::Color::blue,Card::Number::ctor(50) },
+			Card{ L"cn50_3", Card::Color::blue,Card::Number::ctor(50) },
+			Card{ L"cn50_4", Card::Color::blue,Card::Number::ctor(50) },
+			Card{ L"cn75_1", Card::Color::blue,Card::Number::ctor(75) },
+			Card{ L"cn75_2", Card::Color::blue,Card::Number::ctor(75) },
+			Card{ L"cn75_3", Card::Color::blue,Card::Number::ctor(75) },
+			Card{ L"cn75_4", Card::Color::blue,Card::Number::ctor(75) },
 			Card{ L"cn0_1", Card::Color::orange,Card::Number::ctor(0) },
 			Card{ L"cn0_2", Card::Color::orange,Card::Number::ctor(0) },
 			Card{ L"cn4_1", Card::Color::orange,Card::Number::ctor(4) },
@@ -96,28 +96,14 @@ namespace gamedat {
 			Card{ L"cn32_1", Card::Color::orange,Card::Number::ctor(32) },
 			Card{ L"cn32_2", Card::Color::orange,Card::Number::ctor(32) },
 
-			Card{ L"ca_orange_>", Card::Color::orange,Card::Alpha::ctor(L">") },
-			Card{ L"ca_green_>", Card::Color::green,Card::Alpha::ctor(L">") },
-			Card{ L"ca_yellow_>", Card::Color::yellow,Card::Alpha::ctor(L">") },
-
-
-
-			Card{ L"ca_red_A", Card::Color::red,Card::Alpha::ctor(L"A") },
+			Card{ L"ca_red_B", Card::Color::red,Card::Alpha::ctor(L"B") },
 			Card{ L"ca_red_S", Card::Color::red,Card::Alpha::ctor(L"S") },
-			Card{ L"ca_red_Y", Card::Color::red,Card::Alpha::ctor(L"Y") },
-			//Card{ L"ca_red_!", Card::Color::red,Card::Alpha::ctor(L"!") },
-			Card{ L"ca_green_B", Card::Color::green,Card::Alpha::ctor(L"B") },
+			Card{ L"ca_blue_B", Card::Color::blue,Card::Alpha::ctor(L"B") },
+			Card{ L"ca_blue_A", Card::Color::blue,Card::Alpha::ctor(L"A") },
 			Card{ L"ca_green_S", Card::Color::green,Card::Alpha::ctor(L"S") },
 			Card{ L"ca_green_Y", Card::Color::green,Card::Alpha::ctor(L"Y") },
-			Card{ L"ca_green_!", Card::Color::green,Card::Alpha::ctor(L"!") },
-			Card{ L"ca_yellow_B", Card::Color::yellow,Card::Alpha::ctor(L"B") },
-			Card{ L"ca_yellow_A", Card::Color::yellow,Card::Alpha::ctor(L"A") },
-			Card{ L"ca_yellow_Y", Card::Color::yellow,Card::Alpha::ctor(L"Y") },
-			Card{ L"ca_yellow_!", Card::Color::yellow,Card::Alpha::ctor(L"!") },
-			Card{ L"ca_orange_B", Card::Color::orange,Card::Alpha::ctor(L"B") },
 			Card{ L"ca_orange_A", Card::Color::orange,Card::Alpha::ctor(L"A") },
-			Card{ L"ca_orange_S", Card::Color::orange,Card::Alpha::ctor(L"S") },
-			Card{ L"ca_orange_!", Card::Color::orange,Card::Alpha::ctor(L"!") },
+			Card{ L"ca_orange_Y", Card::Color::orange,Card::Alpha::ctor(L"Y") },
 		};
 	}
 }

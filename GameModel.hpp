@@ -89,6 +89,12 @@ class GameModel {
 	s3d::Array<gamedat::Card> discard_list;
 	bool state_gameend = false;
 	bool state_gameover = false;
+
+	static const int max_discard_calor_num = 3;
+	int discardable_color_num() {
+		return max_discard_calor_num - basy_count;
+	}
+	int basy_count = 0;;
 	s3d::Array<gamescene::GameModelMsg> msg_list;
 
 	std::shared_ptr<gamedat::GameData> dat;
@@ -114,12 +120,11 @@ public:
 		}
 	}
 
-	void deal_hands(s3d::Array<gamedat::Card>const &deck, s3d::Array<gamedat::Card>const &discard_init);
+	void deal_hands();
 	void start_nextgame();
 	bool gameover()const {
 		return state_gameover;
 	}
-
 
 	GameModel(std::shared_ptr<gamedat::GameData> const&dat) 
 		:dat(dat)
@@ -131,7 +136,7 @@ public:
 			std::make_shared<PlayerModel>(PlayerModel{ L"3",{} }),
 		};
 
-		deal_hands(dat->get_card_list(), {});
+		deal_hands();
 	}
 private:
 	void apply_msg_impl(gamescene::ClickObject const&msg) {
